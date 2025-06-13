@@ -563,29 +563,27 @@ namespace GameSaveManager
                 return;
             }
 
-            SavedGame backup;
             // Check if a backup is selected
             if (listBackups.SelectedItem == null)
             {
                 MessageUtils.SetErrorMessage(lblError, "Select a game backup before requesting Rename. If you want to Rename a game, use the Edit button.");
                 return;
             }
-            else
-            {
-                backup = listBackups.SelectedItem as SavedGame;
-            }
+            
+            SavedGame backup = listBackups.SelectedItem as SavedGame;
 
-            // Extract the backup name from the selected item
+            // Extract the backup name and current tag
             string oldBackupName = backup.Name;
+            string oldTag = backup.Tag;
 
-            // Present the current backup name to the user for editing
-            using (var dialog = new BackupNameDialog(backup.Tag, listBackups.Size, listBackups.Location, this))
+            // Present the old backup tag to the user for editing
+            using (var dialog = new BackupNameDialog(oldTag, listBackups.Size, listBackups.Location, this))
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     string userInput = dialog.BackupName;
 
-                    if (userInput == oldBackupName)
+                    if (userInput == oldTag)
                     {
                         MessageUtils.SetErrorMessage(lblError, "The new backup name is the same as the old one.");
                         return;
@@ -595,8 +593,7 @@ namespace GameSaveManager
                     game.RenameBackup(backup, userInput, lblError);
                     MessageUtils.SetUserMessage(lblError, $"Rename at {DateTime.Now:HH:mm} completed successfully, from ({oldBackupName}) to ({backup.Name}).");
 
-                    // Update the list of backups
-                    game.LoadBackups(backups, lblError);
+                    // Just refresh the view since the backup object was modified in place
                     RefreshListOfBackups();
                 }
             }
@@ -777,7 +774,7 @@ namespace GameSaveManager
 
             // Restore the most recent backup (first in the list)
             var backup = backups[0];
-            backup.RestoreGame(lblError);
+            game.RestoreGame(backup, lblError);  // Changed from backup.RestoreGame
 
             // Refresh the list of backups after restore
             game.LoadBackups(backups, lblError);
@@ -846,7 +843,7 @@ namespace GameSaveManager
                 // Get the tag from the most recent backup (first in the list)
                 var latestBackup = backups[0];
                 SavedGame backup = game.GetNewBackup(latestBackup.Name, lblError);
-                backup.BackupGame(latestBackup.Tag, lblError);
+                game.BackupGame(backup, latestBackup.Tag, lblError);  // Changed from backup.BackupGame
 
                 // Update the list of backups
                 game.LoadBackups(backups, lblError);

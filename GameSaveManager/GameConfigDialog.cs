@@ -80,14 +80,22 @@ namespace GameSaveManager
                 txtSeparator.Text = game.Separator;               
 
                 // Save file Prefix and Extension are only configured for SubordinateUserFile strategy
-                txtSavePrefix.Visible = true; // game.StrategyType == BackupStrategy.SubordinateUserFile;
-                lblSavePrefix.Visible = true; // game.StrategyType == BackupStrategy.SubordinateUserFile;
-                txtSaveExtension.Visible = true; // game.StrategyType == BackupStrategy.SubordinateUserFile;
-                lblSaveExtension.Visible = true; // game.StrategyType == BackupStrategy.SubordinateUserFile;
+                txtSavePrefix.Visible = game.StrategyType == BackupStrategy.SubordinateUserFile;
+                lblSavePrefix.Visible = game.StrategyType == BackupStrategy.SubordinateUserFile;
+                txtSaveExtension.Visible = game.StrategyType == BackupStrategy.SubordinateUserFile;
+                lblSaveExtension.Visible = game.StrategyType == BackupStrategy.SubordinateUserFile;
                 txtSavePrefix.Text = game.SaveFile?.Prefix;
                 txtSaveExtension.Text = game.SaveFile?.Extension;
                 txtMaxBackups.Text = game.MaxBackups.ToString();
                 txtRevertSuffix.Text = game.RevertSuffix;
+            }
+            else
+            {
+                // Default to hidden for new games
+                txtSavePrefix.Visible = false;
+                lblSavePrefix.Visible = false;
+                txtSaveExtension.Visible = false;
+                lblSaveExtension.Visible = false;
             }
 
             // Set the owner and calculate the position based on the backup listbox bounds
@@ -213,7 +221,7 @@ namespace GameSaveManager
             lblDateFormat.TextAlign = ContentAlignment.MiddleLeft;
             this.Controls.Add(lblDateFormat);
             txtDateFormat.Top = 10 + rowOffset * verticalSpacing;
-            txtDateFormat.Left = this.ClientSize.Width / 2 + 120;
+            txtDateFormat.Left = 120;
             txtDateFormat.Width = this.ClientSize.Width / 2 - 130;
             txtDateFormat.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.Controls.Add(txtDateFormat);
@@ -237,7 +245,7 @@ namespace GameSaveManager
             lblPrefix.TextAlign = ContentAlignment.MiddleLeft;
             this.Controls.Add(lblPrefix);
             txtPrefix.Top = 10 + rowOffset * verticalSpacing;
-            txtPrefix.Left = this.ClientSize.Width / 2 + 120;
+            txtPrefix.Left = 120;
             txtPrefix.Width = this.ClientSize.Width / 2 - 130;
             this.Controls.Add(txtPrefix);
 
@@ -259,7 +267,7 @@ namespace GameSaveManager
             lblSeparator.TextAlign = ContentAlignment.MiddleLeft;
             this.Controls.Add(lblSeparator);
             txtSeparator.Top = 10 + rowOffset * verticalSpacing;
-            txtSeparator.Left = this.ClientSize.Width / 2 + 120;
+            txtSeparator.Left = 120;
             txtSeparator.Width = this.ClientSize.Width / 2 - 130;
             txtSeparator.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.Controls.Add(txtSeparator);
@@ -282,21 +290,21 @@ namespace GameSaveManager
             lblRevertSuffix.TextAlign = ContentAlignment.MiddleLeft;
             this.Controls.Add(lblRevertSuffix);
             txtRevertSuffix.Top = 10 + rowOffset * verticalSpacing;
-            txtRevertSuffix.Left = this.ClientSize.Width / 2 + 120;
+            txtRevertSuffix.Left = 120;
             txtRevertSuffix.Width = this.ClientSize.Width / 2 - 130;
             txtRevertSuffix.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.Controls.Add(txtRevertSuffix);
 
-            // (29Dec24 No longer Optional) fields for SubordinateUserFile strategy
+            // Fields for SubordinateUserFile strategy
             rowOffset++;
             lblSavePrefix.Text = "Save Prefix";
             lblSavePrefix.Location = new Point(10, 10 + rowOffset * verticalSpacing);
-            lblSavePrefix.Visible = false;
+            lblSavePrefix.Visible = false;  // Initially hidden
             lblSavePrefix.TextAlign = ContentAlignment.MiddleLeft;
             this.Controls.Add(lblSavePrefix);
             txtSavePrefix.Location = new Point(120, 10 + rowOffset * verticalSpacing);
-            txtSavePrefix.Size = new Size(this.ClientSize.Width / 2 - 130, 20); // Adjusted width to use half the row
-            txtSavePrefix.Visible = false;
+            txtSavePrefix.Size = new Size(this.ClientSize.Width / 2 - 130, 20);
+            txtSavePrefix.Visible = false;  // Initially hidden
             this.Controls.Add(txtSavePrefix);
 
             lblSaveExtension.Text = "Save Extension (E)";
@@ -336,11 +344,11 @@ namespace GameSaveManager
 
         private void CmbStrategy_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // bool isSubordinateUserFile = cmbStrategy.SelectedItem?.ToString() == BackupStrategy.SubordinateUserFile;
-            lblSavePrefix.Visible = true; // isSubordinateUserFile;
-            txtSavePrefix.Visible = true; // isSubordinateUserFile;
-            lblSaveExtension.Visible = true; // isSubordinateUserFile;
-            txtSaveExtension.Visible = true; // isSubordinateUserFile;
+            bool isSubordinateUserFile = cmbStrategy.SelectedItem?.ToString() == BackupStrategy.SubordinateUserFile;
+            lblSavePrefix.Visible = isSubordinateUserFile;
+            txtSavePrefix.Visible = isSubordinateUserFile;
+            lblSaveExtension.Visible = isSubordinateUserFile;
+            txtSaveExtension.Visible = isSubordinateUserFile;
         }
 
         private void SaveConfigDialog_Resize(object sender, EventArgs e)
@@ -537,7 +545,8 @@ namespace GameSaveManager
             saveConfig.MaxBackups = int.Parse(txtMaxBackups.Text);
             saveConfig.RevertSuffix = txtRevertSuffix.Text;
 
-            if (true) //(saveConfig.StrategyType == BackupStrategy.SubordinateUserFile)
+            // Only set SaveFile for SubordinateUserFile strategy
+            if (saveConfig.StrategyType == BackupStrategy.SubordinateUserFile)
             {
                 saveConfig.SaveFile = new SaveFile
                 {

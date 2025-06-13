@@ -199,6 +199,8 @@ namespace GameSaveManager
                 }
             }
         }
+        
+        private decimal currentBackupVersion = 0;
 
         public static bool IsValidVersionFormat(string format)
         {
@@ -342,8 +344,9 @@ namespace GameSaveManager
             // Update the Date using public property
             backup.Date = backup.CurrentDate;
 
-            // Increment Version
-            backup.IncrementVersion();
+            // Increment Version from game's current version
+            IncrementCurrentBackupVersion();
+            backup.Version = currentBackupVersion;
             
             // Update the Tag
             backup.Tag = newTag;
@@ -392,9 +395,15 @@ namespace GameSaveManager
             Strategy.DeleteBackup(backup.Name, lblError);
         }
 
+
         public void LoadBackups(List<SavedGame> backups, Label lblError)
         {
             Strategy.LoadBackups(backups, lblError);
+            // After loading backups, set the current version from the most recent backup
+            if (backups.Count > 0)
+            {
+                currentBackupVersion = backups[0].Version;
+            }
         }
 
         public GameConfig CloneWithCopyName()
@@ -409,6 +418,22 @@ namespace GameSaveManager
             var clone = JsonSerializer.Deserialize<GameConfig>(json, options);
             clone.Name = this.Name + " - Copy";
             return clone;
+        }
+
+        private void IncrementCurrentBackupVersion()
+        {
+            int decimalPlaces = VersionFormat.Contains('.') ? VersionFormat.Split('.')[1].Length : 0;
+            decimal increment = (decimal)Math.Pow(10, -decimalPlaces);
+            decimal maxVersion = (decimal)Math.Pow(10, VersionFormat.Length - (decimalPlaces > 0 ? decimalPlaces + 1 : 0)) - increment;
+
+            if (currentBackupVersion + increment > maxVersion)
+            {
+                currentBackupVersion = increment;
+            }
+            else
+            {
+                currentBackupVersion += increment;
+            }
         }
     }
 }

@@ -214,24 +214,6 @@ namespace GameSaveManager
         public int Reuse { get; set; }
         public string Date { get; set; }
         public GameConfig Game { get; private set; } // Reference the Game of this SavedGame       
-
-        public void IncrementVersion()
-        {
-            string versionFormat = Game.VersionFormat;
-            int decimalPlaces = versionFormat.Contains('.') ? versionFormat.Split('.')[1].Length : 0;
-            decimal increment = (decimal)Math.Pow(10, -decimalPlaces);
-
-            decimal maxVersion = (decimal)Math.Pow(10, versionFormat.Length - (decimalPlaces > 0 ? decimalPlaces + 1 : 0)) - increment;
-
-            if (Version + increment > maxVersion)
-            {
-                Version = increment;
-            }
-            else
-            {
-                Version += increment;
-            }
-        }
     }
 
 }
