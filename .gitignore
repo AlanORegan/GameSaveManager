@@ -1,0 +1,17 @@
+## Visual Studio files
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+## Backup & report files
+~$*
+*.bak
+Backup*/
